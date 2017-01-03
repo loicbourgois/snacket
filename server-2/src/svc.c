@@ -14,7 +14,7 @@ void rep2str(struct reponse rep, char*buff) {
 
 
 void dialogue_clt() {
-  //pause();
+  /*pause();
   int nb;
   int sd;
   char buff[MAX_BUF];
@@ -28,7 +28,7 @@ void dialogue_clt() {
     traiter(req, &rep);
     rep2str(rep, buff);
     CHECK(write(sd, buff, strlen(buff)+1), "Error");
-  }
+  }*/
 }
 
 void deroute (int sig) {

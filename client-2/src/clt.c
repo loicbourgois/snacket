@@ -3,14 +3,15 @@
 void  dialogue_svc() {
   pause();
 }
- 
+/**
+
+*/
 int main (int c, char**v) {
     int s; 
     struct sockaddr_in svc;
     //svc.st
-    if(c<3)
-    {
-        printf("usage:% ADR_IP Port \n",v[0]);
+    if(c<3) {
+        printf("usage: % ADR_IP Port \n",v[0]);
         exit(-1);
     }
    
