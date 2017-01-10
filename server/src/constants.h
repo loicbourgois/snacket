@@ -14,5 +14,5 @@
 #define ADDR_IP "127.0.0.1"           //Adresse IP du serveur
 #define SVC_PORT 3000               //Port du serveur
 
-
-
+#define MAX_BUFF_SIZE 1024
+#define MAX_PLAYER_COUNT 4
