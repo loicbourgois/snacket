@@ -15,4 +15,6 @@
 #define SVC_PORT 3000               //Port du serveur
 
 #define MAX_BUFF_SIZE 1024
-#define MAX_PLAYER_COUNT 4
+#define MAX_PLAYER_COUNT 8
+#define SLEEP_RUN 250
+#define MIN_PLAYER_SIZE 1

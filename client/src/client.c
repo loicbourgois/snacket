@@ -6,16 +6,45 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <termios.h>
 
-void reading (int socket, char * map, int * width, int * height,
+
+/*******************************************************************************
+* 
+*******************************************************************************/
+static struct termios old, new;
+void initTermios(int echo) {
+  tcgetattr(0, &old); /* grab old terminal i/o settings */
+  new = old; /* make new settings same as old settings */
+  new.c_lflag &= ~ICANON; /* disable buffered i/o */
+  new.c_lflag &= echo ? ECHO : ~ECHO; /* set echo mode */
+  tcsetattr(0, TCSANOW, &new); /* use these new terminal i/o settings now */
+}
+void resetTermios(void) {
+  tcsetattr(0, TCSANOW, &old);
+}
+char getch_(int echo) {
+  char ch;
+  initTermios(echo);
+  ch = getchar();
+  resetTermios();
+  return ch;
+}
+char getch(void) {
+  return getch_(0);
+}
+/*******************************************************************************
+* 
+*******************************************************************************/
+void reading (int * mySocket, char * map, int * width, int * height,
         int * tick) {
     char buff[MAX_BUFF_SIZE];
     char * substring;
     
     while(1) {
-        //usleep(1*1000);
+        //usleep(1);
         memset(buff,0,MAX_BUFF_SIZE);
-        CHECK(read(socket, buff, MAX_BUFF_SIZE), "4");
+        CHECK(read(*mySocket, buff, MAX_BUFF_SIZE), "4");
         substring = strtok(buff, "|");
         if(!strcmp(substring, "map")) {
             memset(map, 0, MAX_BUFF_SIZE);
@@ -56,6 +85,10 @@ char * getTexture(char c) {
             return "33";
             break;
         }
+        case 'f' : {
+            return "<3";
+            break;
+        }
         default : {
             printf("%d\n",c);
             printf("%d\n",' ');
@@ -67,10 +100,9 @@ char * getTexture(char c) {
 
 void displaying (char * map, int * width, int * height, int * tick) {
     char mapToDisplay[MAX_BUFF_SIZE];
-    
     int i;
     while(1) {
-        usleep(100*1000);
+        usleep(SLEEP_RUN/4*1000);
         //
         memset(mapToDisplay, 0, MAX_BUFF_SIZE);
         for(i=0 ; i < (*width)*(*height) ; i++) {
@@ -88,10 +120,47 @@ void displaying (char * map, int * width, int * height, int * tick) {
     }
 }
 
+void writing(int * mySocket) {
+    char key;
+    char buff[MAX_BUFF_SIZE];
+    while(1) {
+        usleep(1);
+        key = getch();
+        switch(key) {
+            case 'z': {
+                memset(buff, 0, MAX_BUFF_SIZE);
+                strcpy(buff, "up");
+                write(*mySocket, buff, strlen(buff));
+                break;
+            }
+            case 'd': {
+                memset(buff, 0, MAX_BUFF_SIZE);
+                strcpy(buff, "right");
+                write(*mySocket, buff, strlen(buff));
+                break;
+            }
+            case 's': {
+                memset(buff, 0, MAX_BUFF_SIZE);
+                strcpy(buff, "down");
+                write(*mySocket, buff, strlen(buff));
+                break;
+            }
+            case 'q': {
+                memset(buff, 0, MAX_BUFF_SIZE);
+                strcpy(buff, "left");
+                write(*mySocket, buff, strlen(buff));
+                break;
+            }
+            default : {
+                break;
+            }
+        }
+    }
+}
+
 
 int main (int c, char**v) {
     // init
-    int socketPulling; 
     char character;
     int pid;
     struct sockaddr_in svc;
@@ -116,25 +185,27 @@ int main (int c, char**v) {
         sizeof(int),
         PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED,
         -1, 0);
+    int * mySocket;
+    mySocket = mmap(NULL, 
+        sizeof(int),
+        PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED,
+        -1, 0);
     //
-    int ARGUMENT_COUNT = 4;
-    if(c < ARGUMENT_COUNT) {
+    int ARGUMENT_COUNT = 3;
+    if(c != ARGUMENT_COUNT) {
         printf("usage: client ip port character");
         exit(-1);
     }
-    //
-    character = v[3][0];
-    printf("Yo, vous êtes %c\n", character);
     // Connection
     svc.sin_family      = AF_INET;
     svc.sin_addr.s_addr = inet_addr(v[1]);
     svc.sin_port        = htons(atoi(v[2]));
-    CHECK(socketPulling=socket(AF_INET, SOCK_STREAM, 0),"clt1");
-    CHECK(connect(socketPulling,(struct sockaddr*)&svc,sizeof(svc)),"PB Connect");
+    CHECK(*mySocket=socket(AF_INET, SOCK_STREAM, 0),"clt1");
+    CHECK(connect(*mySocket,(struct sockaddr*)&svc,sizeof(svc)),"PB Connect");
     // launch reading
     pid=fork();
     if(pid == 0) { 
-        reading(socketPulling, map, width, height, tick);
+        reading(mySocket, map, width, height, tick);
         exit(0);
     }
     // launch displaying
@@ -143,9 +214,12 @@ int main (int c, char**v) {
         displaying(map, width, height, tick);
         exit(0);
     }
-    //
+    // launch writing
+    writing(mySocket);
+    
+    
     pause();
-    close (socketPulling);
+    close (mySocket);
     exit(0);   
 }
 

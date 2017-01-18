@@ -8,7 +8,7 @@ CC		= gcc
 LINKER	= gcc -o
 
 CFLAGS	= -I. -Wall -DDEBUG -g
-LFLAGS	= -I. -lm -DDEBUG -g -lncurses
+LFLAGS	= -I. -lm -DDEBUG -g
 LDFLAGS = -lncurses
 
 SOURCES  := $(wildcard $(SRCDIR)/*.c)

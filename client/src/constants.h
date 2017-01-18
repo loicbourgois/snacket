@@ -16,4 +16,5 @@
 #define SVC_PORT 3000               //Port du serveur
 
 #define MAX_BUFF_SIZE 1024
+#define SLEEP_RUN 250
 
