@@ -1,7 +1,7 @@
-/*******************************************************************************
-* Pour lancer le programme
-* clear ; make clean ; make ; ./bin/server 127.0.0.1 3000
-*******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+//  Pour lancer le programme : 
+//      clear ; make clean ; make ; ./bin/server 127.0.0.1 3000
+////////////////////////////////////////////////////////////////////////////////
 #include "constants.h"
 #include <time.h>
 #include <time.h>
@@ -11,9 +11,9 @@
 #include <fcntl.h>
 #include <time.h>
 #include <stdlib.h>
-/*******************************************************************************
-* Structures
-*******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+// Sturctures
+////////////////////////////////////////////////////////////////////////////////
 struct Point {
    char x;
    char y;
@@ -32,9 +32,9 @@ struct Food {
    char x;
    char y;
 } Food;
-/*******************************************************************************
-* Heu.. ça sert à quoi ? 
-*******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+// Deroute
+////////////////////////////////////////////////////////////////////////////////
 void deroute(int sig) {
     int status;
     switch(sig) {
@@ -47,9 +47,9 @@ void deroute(int sig) {
         }
     }
 }
-/*******************************************************************************
-* Logique pour les joueurs.
-*******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+// Logique pour les joueurs.
+////////////////////////////////////////////////////////////////////////////////
 void resetPlayer(struct Player * players, int id) {
     int i = 0;
     players[id].id = -1;
@@ -79,9 +79,9 @@ int addPlayer(struct Player * players){
     }
     return -1;
 }
-/*******************************************************************************
-* Logique du jeux
-*******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+// Logique du jeux.
+////////////////////////////////////////////////////////////////////////////////
 void repopFood(struct Food * food, char * baseMap, struct Player * players,
         int width, int height) {
     int cellId = 0;
@@ -169,10 +169,10 @@ void checkColisions(char * baseMap, struct Player * players, int playerId,
         repopFood(food, baseMap, players, *width, *height);
     }
 }
-/*******************************************************************************
-* Boucle qui gère la logique du jeux.
-* Il n'y en a qu'une.
-*******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+// Boucle qui gère la logique du jeux.
+// Il n'y en a qu'une.
+////////////////////////////////////////////////////////////////////////////////
 void run(char * baseMap, char * map, int * width, int * height, int * tick, struct Player * players, struct Food * food){
     int i = 0;
     while(1) {
@@ -200,9 +200,9 @@ void run(char * baseMap, char * map, int * width, int * height, int * tick, stru
         *tick = (*tick)+1;
     }
 }
-/*******************************************************************************
-* 
-*******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+//
+////////////////////////////////////////////////////////////////////////////////
 char * getTexture(char c) {
     switch(c) {
         case '*' : {
@@ -239,10 +239,10 @@ char * getTexture(char c) {
         }
     }
 }
-/*******************************************************************************
-* Boucle d'affichage
-* Il y a seulement une boucle d'affichage qui tourne.
-*******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+// Boucle d'affichage
+// Il y a seulement une boucle d'affichage qui tourne.
+////////////////////////////////////////////////////////////////////////////////
 void displaying (char * map, int * width, int * height, int * tick, struct Player * players) {
     char mapToDisplay[MAX_BUFF_SIZE];
     int i;
@@ -257,18 +257,18 @@ void displaying (char * map, int * width, int * height, int * tick, struct Playe
             strcat(mapToDisplay, getTexture(map[i]));
         }
         //
-        printf("\n-----\n\n");
-        printf("tick    %d\n", *tick);
-        printf("width   %d\n", *width);
-        printf("height  %d\n", *height);
+        printf("\n--------------------\n\n");
+        printf("  tick    %d\n", *tick);
+        printf("  width   %d\n", *width);
+        printf("  height  %d\n\n", *height);
         printf("%s\n", mapToDisplay);
     }
 }
-/*******************************************************************************
-* Boucle d'écriture, pour envoyer les données régulièrement aux clients
-* Au total on a N boucles d'écriture. 
-* N = nombre de clients connectés
-*******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+// Boucle d'écriture, pour envoyer les données régulièrement aux clients
+// Au total on a N boucles d'écriture. 
+// N = nombre de clients connectés
+////////////////////////////////////////////////////////////////////////////////
 void writing (int socket, char * map, int * tick, int playerId){
     char buff[MAX_BUFF_SIZE];
     char tickStr[15];
@@ -299,11 +299,11 @@ void writing (int socket, char * map, int * tick, int playerId){
         write(socket, buff, strlen(buff));
     }
 }
-/*******************************************************************************
-* Boucle de lecture pour les sockets
-* Au total on a N boucles de lectures. 
-* N = nombre de clients connectés
-*******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+// Boucle de lecture pour les sockets
+// Au total on a N boucles de lectures. 
+// N = nombre de clients connectés
+////////////////////////////////////////////////////////////////////////////////
 void reading(int otherSocket, int playerId, struct Player * players) {
     char buff[MAX_BUFF_SIZE];
     while(1) {
@@ -325,9 +325,9 @@ void reading(int otherSocket, int playerId, struct Player * players) {
         }
     }
 }
-/*******************************************************************************
-* Début du programme
-*******************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+// Début du serveur
+////////////////////////////////////////////////////////////////////////////////
 int main(int c, char**v) {
     // Inits
     srand(time(NULL));
@@ -343,8 +343,8 @@ int main(int c, char**v) {
     int otherSocket; // Le nouveau socket, pour libérer le socket d'écoute
     struct sockaddr_in moi;
     struct sockaddr_in clt; 
-    int clt_len; // ??
-    struct sigaction new; // ??
+    int clt_len; //
+    struct sigaction new; // 
     int i; 
     int go = 1;
     // Init des variables partagées entre process, grâce à mmap.
@@ -404,16 +404,14 @@ int main(int c, char**v) {
     food[0].x = 9;
     food[0].y = 5;
     repopFood(food, baseMap, players, *width, *height);
-    
-    
-    // Des trucs
-    new.sa_handler=deroute;
+    // 
+    new.sa_handler = deroute;
     new.sa_flags = SA_RESTART;
     CHECK(sigemptyset(&new.sa_mask),
         "erreur ");
     CHECK(sigaction(SIGCHLD,&new, NULL),
         "erreur ");
-    // Des trucs 
+    // 
     CHECK(masterSocket = socket(AF_INET, SOCK_STREAM,0),
         "problem");
     moi.sin_family      = AF_INET;
@@ -438,7 +436,7 @@ int main(int c, char**v) {
     }
     // On boucle pour attendre les nouvelles connections
     while (go) {
-        //on accepte une socket et on la met sur une autre pour garder le canal d'ecoute
+        // On accepte une socket et on la met sur une autre pour garder le canal d'ecoute
         clt_len=sizeof(clt);
         CHECK(otherSocket = accept(masterSocket, (struct sockaddr*)&clt, (socklen_t *)&clt_len),
             "problem");      
